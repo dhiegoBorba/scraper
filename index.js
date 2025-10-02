@@ -172,14 +172,10 @@ async function extrairDadosPagina(pagina) {
       if (match) dataValidade = match[0];
     }
 
-    let expiradoEm = null;
-    let status = null;
-
     if (dataValidade) {
       expiradoEm = formatarData(dataValidade);
       const [d, m, a] = dataValidade.split('/').map(Number);
       const validade = new Date(a, m - 1, d);
-      status = validade >= new Date() ? 'valid' : 'expired';
     }
 
     // Extrair data de coleta
@@ -193,14 +189,12 @@ async function extrairDadosPagina(pagina) {
 
     return {
       expired_at_senatran: expiradoEm,
-      toxicology_status_senatran: status,
       collection_date_senatran: dataColeta,
     };
   } catch (err) {
     console.error('Erro ao extrair dados da página:', err.message);
     return {
       expired_at_senatran: null,
-      toxicology_status_senatran: null,
       collection_date_senatran: null,
     };
   }
@@ -323,6 +317,7 @@ async function iniciarConsultasEmLote(motoristas) {
   const MAX_CONCORRENCIA = 5;
   const semaforo = criarSemaforo(MAX_CONCORRENCIA);
 
+  console.log(CHROME_PROFILE_DIR);
   // cria pasta de perfil se não existir
   if (!fs.existsSync(CHROME_PROFILE_DIR)) {
     fs.mkdirSync(CHROME_PROFILE_DIR, { recursive: true });
@@ -386,17 +381,4 @@ async function iniciarConsultasEmLote(motoristas) {
   console.log('\n--- Todas as consultas foram processadas ---');
 }
 
-// --- MAIN ---
-(async () => {
-  console.log('--- Iniciando processo de consulta em lote ---');
-
-  const caminhoMotoristas = path.resolve(__dirname, 'motoristas.json');
-  if (!fs.existsSync(caminhoMotoristas)) {
-    console.error('Arquivo motoristas.json não encontrado!');
-
-    process.exit(1);
-  }
-
-  const motoristas = JSON.parse(fs.readFileSync(caminhoMotoristas, 'utf8'));
-  await iniciarConsultasEmLote(motoristas);
-})();
+module.exports = { iniciarConsultasEmLote };
