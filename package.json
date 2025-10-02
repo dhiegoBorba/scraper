@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "xvfb-run -a -s \"-screen 0 1920x1080x24\" node index.js"
   },
   "keywords": [],
   "author": "",

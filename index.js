@@ -12,23 +12,28 @@ const SELETOR_VALIDADE = 'br-date-picker[formcontrolname="dataValidade"] input';
 const SELETOR_BOTAO_PROSSEGUIR = "button.br-button.primary";
 const URL_CONSULTA = "https://portalservicos.senatran.serpro.gov.br/#/condutor/consultar-toxicologico";
 const CAMINHO_RESULTADOS = path.resolve(__dirname, "resultados.json");
+const ERROR_SCREENSHOT_DIR = path.resolve(__dirname, "error_screenshots");
+
 
 const CHROME_PROFILE_DIR = path.resolve(os.homedir(), ".chrome_senatran_profile");
 
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
-function formatarDataParaDB(dataStr) {
+function formatarData(dataStr) {
   if (!dataStr) return null;
+
   const [dia, mes, ano] = dataStr.split("/").map(Number);
   const data = new Date(ano, mes - 1, dia);
   const yyyy = data.getFullYear();
   const mm = String(data.getMonth() + 1).padStart(2, "0");
   const dd = String(data.getDate()).padStart(2, "0");
+
   return `${yyyy}-${mm}-${dd} 00:00:00.000`;
 }
 
 function salvarResultadoIncremental(resultado) {
   let resultadosExistentes = [];
+
   if (fs.existsSync(CAMINHO_RESULTADOS)) {
     try {
       resultadosExistentes = JSON.parse(fs.readFileSync(CAMINHO_RESULTADOS, "utf8"));
@@ -59,17 +64,20 @@ function salvarResultadoIncremental(resultado) {
 function criarSemaforo(max) {
   let contador = 0;
   const fila = [];
+
   return {
     async adquirir() {
       if (contador < max) {
         contador++;
         return;
       }
+
       await new Promise((resolver) => fila.push(resolver));
       contador++;
     },
     liberar() {
       contador--;
+
       if (fila.length) fila.shift()();
     },
   };
@@ -79,8 +87,10 @@ function criarSemaforo(max) {
 // Patches extras para reduzir fingerprinting (navigator, plugins, webgl, languages, etc.)
 async function configurarPagina(pagina) {
   await pagina.setRequestInterception(true);
+
   pagina.on("request", (req) => {
     const url = req.url().toLowerCase();
+
     if (
       ["image", "font"].includes(req.resourceType()) ||
       url.includes("googlesyndication") ||
@@ -89,6 +99,7 @@ async function configurarPagina(pagina) {
     ) {
       return req.abort();
     }
+
     req.continue();
   });
 
@@ -118,9 +129,11 @@ async function configurarPagina(pagina) {
     // spoof do WebGL (UNMASKED_VENDOR_WEBGL / UNMASKED_RENDERER_WEBGL)
     try {
       const getParameter = WebGLRenderingContext.prototype.getParameter;
+
       WebGLRenderingContext.prototype.getParameter = function(parameter) {
         if (parameter === 37445) return "Intel Inc."; // UNMASKED_VENDOR_WEBGL
         if (parameter === 37446) return "Intel Iris OpenGL Engine"; // UNMASKED_RENDERER_WEBGL
+
         return getParameter(parameter);
       };
     } catch (e) {}
@@ -129,6 +142,7 @@ async function configurarPagina(pagina) {
     try {
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
       const orig = AudioContext.prototype.constructor;
+
       AudioContext.prototype.constructor = function() {
         return new orig();
       };
@@ -147,17 +161,19 @@ async function extrairDadosPagina(pagina) {
     const dadosBrutos = await pagina.evaluate(() => {
       const resultados = {};
       const linhas = document.querySelectorAll("app-consulta-toxicologico table tr");
+
       linhas.forEach((linha) => {
         const colunas = linha.querySelectorAll("td");
         if (colunas.length === 2) {
           resultados[colunas[0].innerText.trim()] = colunas[1].innerText.trim();
         }
       });
+
       return resultados;
     });
 
-    // Extrair validade do exame
     let dataValidade = null;
+
     if (dadosBrutos["Prazo para realização de novo exame"]) {
       const match = dadosBrutos["Prazo para realização de novo exame"].match(/\d{2}\/\d{2}\/\d{4}/);
       if (match) dataValidade = match[0];
@@ -165,8 +181,9 @@ async function extrairDadosPagina(pagina) {
 
     let expiradoEm = null;
     let status = null;
+
     if (dataValidade) {
-      expiradoEm = formatarDataParaDB(dataValidade);
+      expiradoEm = formatarData(dataValidade);
       const [d, m, a] = dataValidade.split("/").map(Number);
       const validade = new Date(a, m - 1, d);
       status = validade >= new Date() ? "valid" : "expired";
@@ -175,12 +192,17 @@ async function extrairDadosPagina(pagina) {
     // Extrair data de coleta
     let dataColeta = null;
     const coletaRaw = dadosBrutos["Amostra para novo exame coletada em"];
+
     if (coletaRaw && !coletaRaw.includes("Não há registro")) {
       const match = coletaRaw.match(/\d{2}\/\d{2}\/\d{4}/);
-      if (match) dataColeta = formatarDataParaDB(match[0]);
+      if (match) dataColeta = formatarData(match[0]);
     }
 
-    return { expired_at_senatran:expiradoEm, toxicology_status_senatran: status, collection_date_senatran: dataColeta };
+    return { 
+      expired_at_senatran: expiradoEm, 
+      toxicology_status_senatran: status, 
+      collection_date_senatran: dataColeta 
+    };
   } catch (err) {
     console.error("Erro ao extrair dados da página:", err.message);
     return { expired_at_senatran: null, toxicology_status_senatran: null, collection_date_senatran: null };
@@ -189,20 +211,18 @@ async function extrairDadosPagina(pagina) {
 
 // --- EXECUTA CONSULTA PARA UM MOTORISTA ---
 async function consultarMotorista(contexto, motorista, maxTentativas = 3) {
+  const userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
   for (let tentativa = 1; tentativa <= maxTentativas; tentativa++) {
-    let pagina;
+    let pagina = null;
+    
     try {
       pagina = await contexto.newPage();
-
-      // Ajustes de UA e viewport por página
-      const userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
       await pagina.setUserAgent(userAgent);
       await pagina.setViewport({ width: 1920, height: 1080 });
-
       await configurarPagina(pagina);
 
       console.log(`Tentativa ${tentativa}/${maxTentativas} para CPF ${motorista.cpf}...`);
-
       await pagina.goto(URL_CONSULTA, { waitUntil: "networkidle2", timeout: 30000 });
 
       // Preenche formulário
@@ -226,18 +246,24 @@ async function consultarMotorista(contexto, motorista, maxTentativas = 3) {
 
       if (resultado === "erro") {
         let msgErro = "Mensagem de erro desconhecida";
+
         try {
           msgErro = await pagina.$eval(".br-message.is-danger .title", el => el.innerText.trim());
         } catch {}
 
-        try { await pagina.close(); } catch {}
-
         if (tentativa === maxTentativas) {
+          await screenshot(pagina, motorista.cpf, tentativa);
+          try { await pagina.close(); } catch {}
+
           return { sucesso: false, erro: `Condutor não encontrado / erro: ${msgErro}` };
         }
 
-        console.log(`🔄 Repetindo CPF ${motorista.cpf}...`);
-        await sleep(2000);
+        console.log(`🔄 Repetindo CPF ${motorista.cpf} (erro detectado): ${msgErro}`);
+
+        try { await pagina.close(); } catch {}
+
+        await sleep(500);
+
         continue;
       }
 
@@ -249,16 +275,36 @@ async function consultarMotorista(contexto, motorista, maxTentativas = 3) {
 
     } catch (err) {
       console.error(`⚠️ Erro na tentativa ${tentativa} para CPF ${motorista.cpf}: ${err.message}`);
-      try { await pagina.screenshot({ path: `erro_${motorista.cpf}_tentativa${tentativa}.png` }); } catch {}
+
+      if (tentativa === maxTentativas) {
+        await screenshot(pagina, motorista.cpf, tentativa);
+
+        try { if (pagina && !pagina.isClosed()) await pagina.close(); } catch {}
+        return { sucesso: false, erro: err.message };
+      }
+
       try { if (pagina && !pagina.isClosed()) await pagina.close(); } catch {}
-
-      if (tentativa === maxTentativas) return { sucesso: false, erro: err.message };
-
       console.log(`🔄 Repetindo CPF ${motorista.cpf}...`);
-      await sleep(2000);
+      await sleep(500);
     }
   }
+
+  return { sucesso: false, erro: "Falha desconhecida ao consultar motorista" };
 }
+
+async function screenshot(pagina, cpf, tentativa) {
+  if (!pagina) return;
+
+  try {
+    const arquivoScreenshot = path.join(ERROR_SCREENSHOT_DIR, `erro_${cpf}_tentativa${tentativa}.png`);
+
+    await pagina.screenshot({ path: arquivoScreenshot, fullPage: true });
+
+  } catch (e) {
+    console.error("❌ Falha ao salvar screenshot de erro:", e.message);
+  }
+}
+
 
 // --- PROCESSA CONSULTAS EM LOTE ---
 async function iniciarConsultasEmLote(motoristas) {
@@ -273,7 +319,7 @@ async function iniciarConsultasEmLote(motoristas) {
 
   const navegador = await puppeteer.launch({
     headless: false, // necessário para o site
-    // use o caminho do chrome instalado no servidor; ajuste se necessário
+    // use o caminho do chrome instalado no servidor
     executablePath: "/usr/bin/google-chrome-stable",
     args: [
       "--no-sandbox",
@@ -291,6 +337,7 @@ async function iniciarConsultasEmLote(motoristas) {
 
   const tarefas = motoristas.map((motorista, idx) => (async () => {
     await semaforo.adquirir();
+    
     try {
       console.log(`\n--- [${idx + 1}/${motoristas.length}] Consultando CPF: ${motorista.cpf} ---`);
       const contexto = await navegador.createBrowserContext();
@@ -321,7 +368,9 @@ async function iniciarConsultasEmLote(motoristas) {
 
   const caminhoMotoristas = path.resolve(__dirname, "motoristas.json");
   if (!fs.existsSync(caminhoMotoristas)) {
+
     console.error("Arquivo motoristas.json não encontrado!");
+    
     process.exit(1);
   }
 
