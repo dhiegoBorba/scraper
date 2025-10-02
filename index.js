@@ -2,20 +2,20 @@ const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 const fs = require("fs");
 const path = require("path");
+const os = require("os");
 
 puppeteer.use(StealthPlugin());
 
-// --- CONFIGURAÇÕES DE SELETORES E URL ---
 const SELETOR_CPF = 'br-input[formcontrolname="cpf"] input';
 const SELETOR_NASCIMENTO = 'br-date-picker[formcontrolname="dataNascimento"] input';
 const SELETOR_VALIDADE = 'br-date-picker[formcontrolname="dataValidade"] input';
 const SELETOR_BOTAO_PROSSEGUIR = "button.br-button.primary";
-const URL_CONSULTA =
-  "https://portalservicos.senatran.serpro.gov.br/#/condutor/consultar-toxicologico";
+const URL_CONSULTA = "https://portalservicos.senatran.serpro.gov.br/#/condutor/consultar-toxicologico";
 const CAMINHO_RESULTADOS = path.resolve(__dirname, "resultados.json");
 
-// --- FUNÇÕES AUXILIARES ---
-const aguardar = (ms) => new Promise((res) => setTimeout(res, ms));
+const CHROME_PROFILE_DIR = path.resolve(os.homedir(), ".chrome_senatran_profile");
+
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 function formatarDataParaDB(dataStr) {
   if (!dataStr) return null;
@@ -27,7 +27,6 @@ function formatarDataParaDB(dataStr) {
   return `${yyyy}-${mm}-${dd} 00:00:00.000`;
 }
 
-// Salva cada resultado incrementalmente no JSON
 function salvarResultadoIncremental(resultado) {
   let resultadosExistentes = [];
   if (fs.existsSync(CAMINHO_RESULTADOS)) {
@@ -77,6 +76,7 @@ function criarSemaforo(max) {
 }
 
 // --- CONFIGURAÇÃO DE PÁGINA PARA EVITAR TRACKING ---
+// Patches extras para reduzir fingerprinting (navigator, plugins, webgl, languages, etc.)
 async function configurarPagina(pagina) {
   await pagina.setRequestInterception(true);
   pagina.on("request", (req) => {
@@ -92,8 +92,52 @@ async function configurarPagina(pagina) {
     req.continue();
   });
 
+  // Cabeçalhos
+  await pagina.setExtraHTTPHeaders({
+    "Accept-Language": "pt-BR,pt;q=0.9",
+  });
+
+  // Avaliações injetadas antes de qualquer script da página
   await pagina.evaluateOnNewDocument(() => {
+    // navigator.webdriver
     Object.defineProperty(navigator, "webdriver", { get: () => false });
+
+    // languages
+    Object.defineProperty(navigator, "languages", { get: () => ["pt-BR", "pt"] });
+    Object.defineProperty(navigator, "language", { get: () => "pt-BR" });
+
+    // plugins & mimeTypes (suficientemente crível)
+    Object.defineProperty(navigator, "plugins", { get: () => [1, 2, 3, 4, 5] });
+    Object.defineProperty(navigator, "mimeTypes", { get: () => [{type:'application/pdf'}] });
+
+    // hardwareConcurrency
+    try {
+      Object.defineProperty(navigator, "hardwareConcurrency", { get: () => 4 });
+    } catch (e) {}
+
+    // spoof do WebGL (UNMASKED_VENDOR_WEBGL / UNMASKED_RENDERER_WEBGL)
+    try {
+      const getParameter = WebGLRenderingContext.prototype.getParameter;
+      WebGLRenderingContext.prototype.getParameter = function(parameter) {
+        if (parameter === 37445) return "Intel Inc."; // UNMASKED_VENDOR_WEBGL
+        if (parameter === 37446) return "Intel Iris OpenGL Engine"; // UNMASKED_RENDERER_WEBGL
+        return getParameter(parameter);
+      };
+    } catch (e) {}
+
+    // AudioContext falsificado minimamente
+    try {
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      const orig = AudioContext.prototype.constructor;
+      AudioContext.prototype.constructor = function() {
+        return new orig();
+      };
+    } catch (e) {}
+
+    // remover sinal de automação (por precaução)
+    try {
+      delete navigator.__proto__.webdriver;
+    } catch (e) {}
   });
 }
 
@@ -149,6 +193,12 @@ async function consultarMotorista(contexto, motorista, maxTentativas = 3) {
     let pagina;
     try {
       pagina = await contexto.newPage();
+
+      // Ajustes de UA e viewport por página
+      const userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+      await pagina.setUserAgent(userAgent);
+      await pagina.setViewport({ width: 1920, height: 1080 });
+
       await configurarPagina(pagina);
 
       console.log(`Tentativa ${tentativa}/${maxTentativas} para CPF ${motorista.cpf}...`);
@@ -187,7 +237,7 @@ async function consultarMotorista(contexto, motorista, maxTentativas = 3) {
         }
 
         console.log(`🔄 Repetindo CPF ${motorista.cpf}...`);
-        await aguardar(2000);
+        await sleep(2000);
         continue;
       }
 
@@ -205,7 +255,7 @@ async function consultarMotorista(contexto, motorista, maxTentativas = 3) {
       if (tentativa === maxTentativas) return { sucesso: false, erro: err.message };
 
       console.log(`🔄 Repetindo CPF ${motorista.cpf}...`);
-      await aguardar(2000);
+      await sleep(2000);
     }
   }
 }
@@ -215,17 +265,29 @@ async function iniciarConsultasEmLote(motoristas) {
   const MAX_CONCORRENCIA = 5;
   const semaforo = criarSemaforo(MAX_CONCORRENCIA);
 
+  // cria pasta de perfil se não existir
+  if (!fs.existsSync(CHROME_PROFILE_DIR)) {
+    fs.mkdirSync(CHROME_PROFILE_DIR, { recursive: true });
+    console.log(`✔️ Criado perfil Chrome em ${CHROME_PROFILE_DIR}`);
+  }
+
   const navegador = await puppeteer.launch({
     headless: false, // necessário para o site
+    // use o caminho do chrome instalado no servidor; ajuste se necessário
+    executablePath: "/usr/bin/google-chrome-stable",
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
-      "--window-size=1920,1080"
+      "--window-size=1920,1080",
+      "--disable-blink-features=AutomationControlled",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--disable-infobars",
     ],
     defaultViewport: null, 
+    userDataDir: CHROME_PROFILE_DIR,
   });
-
 
   const tarefas = motoristas.map((motorista, idx) => (async () => {
     await semaforo.adquirir();
@@ -266,3 +328,4 @@ async function iniciarConsultasEmLote(motoristas) {
   const motoristas = JSON.parse(fs.readFileSync(caminhoMotoristas, "utf8"));
   await iniciarConsultasEmLote(motoristas);
 })();
+
