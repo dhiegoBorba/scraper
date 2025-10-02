@@ -13,7 +13,7 @@ const SELECTOR_BUTTON_PROCEED = 'button.br-button.primary';
 
 // --- CONSTANTS ---
 const URL = 'https://portalservicos.senatran.serpro.gov.br/#/condutor/consultar-toxicologico';
-const ERROR_SCREENSHOT_PATH = path.resolve(__dirname, 'error_screenshots');
+const ERROR_SCREENSHOT_PATH = path.resolve(__dirname, 'logs/error_screenshots');
 const CHROME_USER_DATA_DIR = path.resolve(os.homedir(), '.chrome_senatran_profile');
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));

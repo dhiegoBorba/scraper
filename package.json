@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "xvfb-run -a -s \"-screen 0 1920x1080x24\" node test/test.js",
+    "test": "xvfb-run -a -s \"-screen 0 1920x1080x24\" node test/toxicologicalTest.js",
     "start": "xvfb-run -a -s \"-screen 0 1920x1080x24\" node index.js"
   },
   "keywords": [],
@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "dotenv": "^17.2.3",
     "puppeteer": "^24.22.3",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2"
