@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { iniciarConsultasEmLote } = require('../index');
+const { processDriverBatch } = require('../index');
 
 (async () => {
   console.log('--- Iniciando processo de consulta em lote ---');
@@ -13,5 +13,8 @@ const { iniciarConsultasEmLote } = require('../index');
   }
 
   const motoristas = JSON.parse(fs.readFileSync(caminhoMotoristas, 'utf8'));
-  await iniciarConsultasEmLote(motoristas);
+
+  for await (const resultado of processDriverBatch(motoristas)) {
+    console.log('aquiiiiiiiiii ', resultado);
+  }
 })();

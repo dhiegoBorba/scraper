@@ -1,89 +1,55 @@
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
 puppeteer.use(StealthPlugin());
 
-const SELETOR_CPF = 'br-input[formcontrolname="cpf"] input';
-const SELETOR_NASCIMENTO = 'br-date-picker[formcontrolname="dataNascimento"] input';
-const SELETOR_VALIDADE = 'br-date-picker[formcontrolname="dataValidade"] input';
-const SELETOR_BOTAO_PROSSEGUIR = 'button.br-button.primary';
-const URL_CONSULTA =
-  'https://portalservicos.senatran.serpro.gov.br/#/condutor/consultar-toxicologico';
-const CAMINHO_RESULTADOS = path.resolve(__dirname, 'resultados.json');
-const ERROR_SCREENSHOT_DIR = path.resolve(__dirname, 'error_screenshots');
+// --- SELECTORS ---
+const SELECTOR_CPF = 'br-input[formcontrolname="cpf"] input';
+const SELECTOR_BIRTHDATE = 'br-date-picker[formcontrolname="dataNascimento"] input';
+const SELECTOR_LICENSE_EXPIRY = 'br-date-picker[formcontrolname="dataValidade"] input';
+const SELECTOR_BUTTON_PROCEED = 'button.br-button.primary';
 
-const CHROME_PROFILE_DIR = path.resolve(os.homedir(), '.chrome_senatran_profile');
+// --- CONSTANTS ---
+const URL = 'https://portalservicos.senatran.serpro.gov.br/#/condutor/consultar-toxicologico';
+const ERROR_SCREENSHOT_PATH = path.resolve(__dirname, 'error_screenshots');
+const CHROME_USER_DATA_DIR = path.resolve(os.homedir(), '.chrome_senatran_profile');
 
-const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
-function formatarData(dataStr) {
-  if (!dataStr) return null;
-
-  const [dia, mes, ano] = dataStr.split('/').map(Number);
-  const data = new Date(ano, mes - 1, dia);
-  const yyyy = data.getFullYear();
-  const mm = String(data.getMonth() + 1).padStart(2, '0');
-  const dd = String(data.getDate()).padStart(2, '0');
-
-  return `${yyyy}-${mm}-${dd} 00:00:00.000`;
+function formatDate(dateStr) {
+  if (!dateStr) return null;
+  const [day, month, year] = dateStr.split('/').map(Number);
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} 00:00:00.000`;
 }
 
-function salvarResultadoIncremental(resultado) {
-  let resultadosExistentes = [];
-
-  if (fs.existsSync(CAMINHO_RESULTADOS)) {
-    try {
-      resultadosExistentes = JSON.parse(fs.readFileSync(CAMINHO_RESULTADOS, 'utf8'));
-    } catch (err) {
-      console.error('Erro ao ler resultados.json existente. Criando novo arquivo.', err.message);
-      resultadosExistentes = [];
-    }
-  }
-
-  resultadosExistentes.push(resultado);
-
-  try {
-    fs.writeFileSync(CAMINHO_RESULTADOS, JSON.stringify(resultadosExistentes, null, 2), 'utf8');
-    console.log(`✅ Resultado do CPF ${resultado.cpf} salvo com sucesso.`);
-  } catch (err) {
-    console.error(`❌ Erro ao salvar resultado do CPF ${resultado.cpf}:`, err.message);
-  }
-}
-
-// --- SEMÁFORO PARA LIMITAR CONCORRÊNCIA ---
-function criarSemaforo(max) {
-  let contador = 0;
-  const fila = [];
+function createSemaphore(maxConcurrency) {
+  let count = 0;
+  const queue = [];
 
   return {
-    async adquirir() {
-      if (contador < max) {
-        contador++;
+    async acquire() {
+      if (count < maxConcurrency) {
+        count++;
         return;
       }
-
-      await new Promise((resolver) => fila.push(resolver));
-      contador++;
+      await new Promise((resolve) => queue.push(resolve));
+      count++;
     },
-    liberar() {
-      contador--;
-
-      if (fila.length) fila.shift()();
+    release() {
+      count--;
+      if (queue.length) queue.shift()();
     },
   };
 }
 
-// --- CONFIGURAÇÃO DE PÁGINA PARA EVITAR TRACKING ---
-// Patches extras para reduzir fingerprinting (navigator, plugins, webgl, languages, etc.)
-async function configurarPagina(pagina) {
-  await pagina.setRequestInterception(true);
+// --- PAGE SETUP ---
+async function setupPage(page) {
+  await page.setRequestInterception(true);
 
-  pagina.on('request', (req) => {
+  page.on('request', (req) => {
     const url = req.url().toLowerCase();
-
     if (
       ['image', 'font'].includes(req.resourceType()) ||
       url.includes('googlesyndication') ||
@@ -92,17 +58,14 @@ async function configurarPagina(pagina) {
     ) {
       return req.abort();
     }
-
     req.continue();
   });
 
-  // Cabeçalhos
-  await pagina.setExtraHTTPHeaders({
+  await page.setExtraHTTPHeaders({
     'Accept-Language': 'pt-BR,pt;q=0.9',
   });
 
-  // Avaliações injetadas antes de qualquer script da página
-  await pagina.evaluateOnNewDocument(() => {
+  await page.evaluateOnNewDocument(() => {
     // navigator.webdriver
     Object.defineProperty(navigator, 'webdriver', { get: () => false });
 
@@ -110,7 +73,7 @@ async function configurarPagina(pagina) {
     Object.defineProperty(navigator, 'languages', { get: () => ['pt-BR', 'pt'] });
     Object.defineProperty(navigator, 'language', { get: () => 'pt-BR' });
 
-    // plugins & mimeTypes (suficientemente crível)
+    // plugins & mimeTypes
     Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
     Object.defineProperty(navigator, 'mimeTypes', { get: () => [{ type: 'application/pdf' }] });
 
@@ -119,214 +82,170 @@ async function configurarPagina(pagina) {
       Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 4 });
     } catch (e) {}
 
-    // spoof do WebGL (UNMASKED_VENDOR_WEBGL / UNMASKED_RENDERER_WEBGL)
+    // spoof WebGL
     try {
-      const getParameter = WebGLRenderingContext.prototype.getParameter;
-
-      WebGLRenderingContext.prototype.getParameter = function (parameter) {
-        if (parameter === 37445) return 'Intel Inc.'; // UNMASKED_VENDOR_WEBGL
-        if (parameter === 37446) return 'Intel Iris OpenGL Engine'; // UNMASKED_RENDERER_WEBGL
-
-        return getParameter(parameter);
+      const originalGetParameter = WebGLRenderingContext.prototype.getParameter;
+      WebGLRenderingContext.prototype.getParameter = function (param) {
+        if (param === 37445) return 'Intel Inc.'; // UNMASKED_VENDOR_WEBGL
+        if (param === 37446) return 'Intel Iris OpenGL Engine'; // UNMASKED_RENDERER_WEBGL
+        return originalGetParameter(param);
       };
     } catch (e) {}
 
-    // AudioContext falsificado minimamente
+    // AudioContext minimal spoof
     try {
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
       const orig = AudioContext.prototype.constructor;
-
       AudioContext.prototype.constructor = function () {
         return new orig();
       };
     } catch (e) {}
 
-    // remover sinal de automação (por precaução)
+    // remove webdriver prototype
     try {
       delete navigator.__proto__.webdriver;
     } catch (e) {}
   });
 }
 
-// --- EXTRAÇÃO DE DADOS DA PÁGINA ---
-async function extrairDadosPagina(pagina) {
+// --- DATA EXTRACTION ---
+async function extractDriverData(page) {
   try {
-    const dadosBrutos = await pagina.evaluate(() => {
-      const resultados = {};
-      const linhas = document.querySelectorAll('app-consulta-toxicologico table tr');
-
-      linhas.forEach((linha) => {
-        const colunas = linha.querySelectorAll('td');
-        if (colunas.length === 2) {
-          resultados[colunas[0].innerText.trim()] = colunas[1].innerText.trim();
-        }
+    const rawData = await page.evaluate(() => {
+      const results = {};
+      const rows = document.querySelectorAll('app-consulta-toxicologico table tr');
+      rows.forEach((row) => {
+        const cols = row.querySelectorAll('td');
+        if (cols.length === 2) results[cols[0].innerText.trim()] = cols[1].innerText.trim();
       });
-
-      return resultados;
+      return results;
     });
 
-    let dataValidade = null;
-
-    if (dadosBrutos['Prazo para realização de novo exame']) {
-      const match = dadosBrutos['Prazo para realização de novo exame'].match(/\d{2}\/\d{2}\/\d{4}/);
-      if (match) dataValidade = match[0];
+    let expiryDate = null;
+    const expiryRaw = rawData['Prazo para realização de novo exame'];
+    if (expiryRaw) {
+      const match = expiryRaw.match(/\d{2}\/\d{2}\/\d{4}/);
+      if (match) expiryDate = formatDate(match[0]);
     }
 
-    if (dataValidade) {
-      expiradoEm = formatarData(dataValidade);
-      const [d, m, a] = dataValidade.split('/').map(Number);
-      const validade = new Date(a, m - 1, d);
-    }
-
-    // Extrair data de coleta
-    let dataColeta = null;
-    const coletaRaw = dadosBrutos['Amostra para novo exame coletada em'];
-
-    if (coletaRaw && !coletaRaw.includes('Não há registro')) {
-      const match = coletaRaw.match(/\d{2}\/\d{2}\/\d{4}/);
-      if (match) dataColeta = formatarData(match[0]);
+    let collectionDate = null;
+    const collectionText = rawData['Amostra para novo exame coletada em'];
+    if (collectionText && !collectionText.includes('Não há registro')) {
+      const match = collectionText.match(/\d{2}\/\d{2}\/\d{4}/);
+      if (match) collectionDate = formatDate(match[0]);
     }
 
     return {
-      expired_at_senatran: expiradoEm,
-      collection_date_senatran: dataColeta,
+      expired_at_senatran: expiryDate,
+      collection_date_senatran: collectionDate,
     };
   } catch (err) {
-    console.error('Erro ao extrair dados da página:', err.message);
-    return {
-      expired_at_senatran: null,
-      collection_date_senatran: null,
-    };
+    console.error('Error extracting driver data:', err.message);
+    return { expired_at_senatran: null, collection_date_senatran: null };
   }
 }
 
-// --- EXECUTA CONSULTA PARA UM MOTORISTA ---
-async function consultarMotorista(contexto, motorista, maxTentativas = 3) {
+// --- DRIVER QUERY ---
+async function queryDriverRecord(browserContext, driver, maxAttempts = 3) {
   const userAgent =
     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
-  for (let tentativa = 1; tentativa <= maxTentativas; tentativa++) {
-    let pagina = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    let page = null;
 
     try {
-      pagina = await contexto.newPage();
-      await pagina.setUserAgent(userAgent);
-      await pagina.setViewport({ width: 1920, height: 1080 });
-      await configurarPagina(pagina);
+      page = await browserContext.newPage();
+      await page.setUserAgent(userAgent);
+      await page.setViewport({ width: 1920, height: 1080 });
+      await setupPage(page);
 
-      console.log(`Tentativa ${tentativa}/${maxTentativas} para CPF ${motorista.cpf}...`);
-      await pagina.goto(URL_CONSULTA, { waitUntil: 'networkidle2', timeout: 30000 });
+      console.log(`Attempt ${attempt}/${maxAttempts} for CPF ${driver.cpf}...`);
+      await page.goto(URL, { waitUntil: 'networkidle2', timeout: 30000 });
 
-      // Preenche formulário
-      await pagina.waitForSelector(SELETOR_CPF, { visible: true, timeout: 30000 });
-      await pagina.click(SELETOR_CPF, { clickCount: 3 });
-      await pagina.type(SELETOR_CPF, motorista.cpf, { delay: 120 });
+      await page.waitForSelector(SELECTOR_CPF, { visible: true, timeout: 30000 });
+      await page.click(SELECTOR_CPF, { clickCount: 3 });
+      await page.type(SELECTOR_CPF, driver.cpf, { delay: 120 });
 
-      await pagina.click(SELETOR_NASCIMENTO, { clickCount: 3 });
-      await pagina.type(SELETOR_NASCIMENTO, motorista.birthday, { delay: 120 });
+      await page.click(SELECTOR_BIRTHDATE, { clickCount: 3 });
+      await page.type(SELECTOR_BIRTHDATE, driver.birthday, { delay: 120 });
 
-      await pagina.click(SELETOR_VALIDADE, { clickCount: 3 });
-      await pagina.type(SELETOR_VALIDADE, motorista.cnh_due_at, { delay: 120 });
+      await page.click(SELECTOR_LICENSE_EXPIRY, { clickCount: 3 });
+      await page.type(SELECTOR_LICENSE_EXPIRY, driver.cnh_due_at, { delay: 120 });
 
-      await pagina.click(SELETOR_BOTAO_PROSSEGUIR);
+      await page.click(SELECTOR_BUTTON_PROCEED);
 
-      // Espera página de resultados ou mensagem de erro
-      const resultado = await Promise.race([
-        pagina
-          .waitForSelector('h3.text-primary', { visible: true, timeout: 30000 })
-          .then(() => 'ok'),
-        pagina
+      const statusResult = await Promise.race([
+        page.waitForSelector('h3.text-primary', { visible: true, timeout: 30000 }).then(() => 'ok'),
+        page
           .waitForSelector('.br-message.is-danger', { visible: true, timeout: 30000 })
-          .then(() => 'erro'),
+          .then(() => 'error'),
       ]);
 
-      if (resultado === 'erro') {
-        let msgErro = 'Mensagem de erro desconhecida';
-
+      if (statusResult === 'error') {
+        let errorMsg = 'Unknown error';
         try {
-          msgErro = await pagina.$eval('.br-message.is-danger .title', (el) => el.innerText.trim());
+          errorMsg = await page.$eval('.br-message.is-danger .title', (el) => el.innerText.trim());
         } catch {}
-
-        if (tentativa === maxTentativas) {
-          await screenshot(pagina, motorista.cpf, tentativa);
+        if (attempt === maxAttempts) {
+          await captureScreenshot(page, driver.cpf, attempt);
           try {
-            await pagina.close();
+            await page.close();
           } catch {}
-
-          return { sucesso: false, erro: `Condutor não encontrado / erro: ${msgErro}` };
+          return { success: false, error: `Driver not found / error: ${errorMsg}` };
         }
 
-        console.log(`🔄 Repetindo CPF ${motorista.cpf} (erro detectado): ${msgErro}`);
-
+        console.log(`🔄 Retrying CPF ${driver.cpf} (error: ${errorMsg})`);
         try {
-          await pagina.close();
+          await page.close();
         } catch {}
-
-        await sleep(500);
-
+        await delay(500);
         continue;
       }
 
-      console.log(`✅ Página de resultados carregada para CPF ${motorista.cpf}`);
-      const dados = await extrairDadosPagina(pagina);
-
+      const data = await extractDriverData(page);
       try {
-        await pagina.close();
+        await page.close();
       } catch {}
-      return { sucesso: true, dados };
+      return { success: true, data };
     } catch (err) {
-      console.error(`⚠️ Erro na tentativa ${tentativa} para CPF ${motorista.cpf}: ${err.message}`);
-
-      if (tentativa === maxTentativas) {
-        await screenshot(pagina, motorista.cpf, tentativa);
-
+      console.error(`⚠️ Attempt ${attempt} error for CPF ${driver.cpf}: ${err.message}`);
+      if (attempt === maxAttempts) {
+        await captureScreenshot(page, driver.cpf, attempt);
         try {
-          if (pagina && !pagina.isClosed()) await pagina.close();
+          if (page && !page.isClosed()) await page.close();
         } catch {}
-        return { sucesso: false, erro: err.message };
+        return { success: false, error: err.message };
       }
 
       try {
-        if (pagina && !pagina.isClosed()) await pagina.close();
+        if (page && !page.isClosed()) await page.close();
       } catch {}
-      console.log(`🔄 Repetindo CPF ${motorista.cpf}...`);
-      await sleep(500);
+      console.log(`🔄 Retrying CPF ${driver.cpf}...`);
+      await delay(500);
     }
   }
 
-  return { sucesso: false, erro: 'Falha desconhecida ao consultar motorista' };
+  return { success: false, error: 'Unknown failure querying driver' };
 }
 
-async function screenshot(pagina, cpf, tentativa) {
-  if (!pagina) return;
-
+// --- SCREENSHOT ---
+async function captureScreenshot(page, cpf, attempt) {
+  if (!page) return;
   try {
-    const arquivoScreenshot = path.join(
-      ERROR_SCREENSHOT_DIR,
-      `erro_${cpf}_tentativa${tentativa}.png`,
-    );
-
-    await pagina.screenshot({ path: arquivoScreenshot, fullPage: true });
-  } catch (e) {
-    console.error('❌ Falha ao salvar screenshot de erro:', e.message);
+    const filePath = path.join(ERROR_SCREENSHOT_PATH, `error_${cpf}_attempt${attempt}.png`);
+    await page.screenshot({ path: filePath, fullPage: true });
+  } catch (err) {
+    console.error('❌ Failed to capture error screenshot:', err.message);
   }
 }
 
-// --- PROCESSA CONSULTAS EM LOTE ---
-async function iniciarConsultasEmLote(motoristas) {
-  const MAX_CONCORRENCIA = 5;
-  const semaforo = criarSemaforo(MAX_CONCORRENCIA);
+// --- BATCH PROCESS ---
+async function* processDriverBatch(drivers) {
+  const MAX_CONCURRENCY = 5;
+  const semaphore = createSemaphore(MAX_CONCURRENCY);
 
-  console.log(CHROME_PROFILE_DIR);
-  // cria pasta de perfil se não existir
-  if (!fs.existsSync(CHROME_PROFILE_DIR)) {
-    fs.mkdirSync(CHROME_PROFILE_DIR, { recursive: true });
-    console.log(`✔️ Criado perfil Chrome em ${CHROME_PROFILE_DIR}`);
-  }
-
-  const navegador = await puppeteer.launch({
-    headless: false, // necessário para o site
-    // use o caminho do chrome instalado no servidor
+  const browser = await puppeteer.launch({
+    headless: false,
     executablePath: '/usr/bin/google-chrome-stable',
     args: [
       '--no-sandbox',
@@ -339,46 +258,41 @@ async function iniciarConsultasEmLote(motoristas) {
       '--disable-infobars',
     ],
     defaultViewport: null,
-    userDataDir: CHROME_PROFILE_DIR,
+    userDataDir: CHROME_USER_DATA_DIR,
   });
 
-  const tarefas = motoristas.map((motorista, idx) =>
-    (async () => {
-      await semaforo.adquirir();
+  const results = [];
 
-      try {
-        console.log(
-          `\n--- [${idx + 1}/${motoristas.length}] Consultando CPF: ${motorista.cpf} ---`,
-        );
-        const contexto = await navegador.createBrowserContext();
+  async function processDriver(idx, driver) {
+    await semaphore.acquire();
+    try {
+      const browserContext = await browser.createBrowserContext();
+      const result = await queryDriverRecord(browserContext, driver);
 
-        const resultado = await consultarMotorista(contexto, motorista);
+      const driverResult = result.success
+        ? { ...driver, ...result.data, search_status: 'success' }
+        : { ...driver, search_status: 'error', error: result.error };
 
-        if (resultado.sucesso) {
-          salvarResultadoIncremental({
-            ...motorista,
-            ...resultado.dados,
-            search_status_senatran: 'success',
-          });
-        } else {
-          salvarResultadoIncremental({
-            ...motorista,
-            search_status_senatran: 'error',
-            error: resultado.erro,
-          });
-        }
+      results.push(driverResult);
+    } catch (err) {
+      console.error('Processing error:', err);
+    } finally {
+      semaphore.release();
+    }
+  }
 
-        await contexto.close();
-      } finally {
-        semaforo.liberar();
-      }
-    })(),
-  );
+  const tasks = drivers.map((driver, idx) => processDriver(idx, driver));
 
-  await Promise.all(tarefas);
-  await navegador.close();
+  while (results.length < drivers.length) {
+    while (results.length > 0) yield results.shift();
+    await delay(50);
+  }
 
-  console.log('\n--- Todas as consultas foram processadas ---');
+  await Promise.all(tasks);
+  while (results.length > 0) yield results.shift();
+
+  await browser.close();
+  console.log('\n--- All driver queries completed ---');
 }
 
-module.exports = { iniciarConsultasEmLote };
+module.exports = { processDriverBatch };
