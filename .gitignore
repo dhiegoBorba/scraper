@@ -14,8 +14,6 @@ build/
 .DS_Store
 .env
 
-
 # Screenshots
-error_screenshots/
+logs/error_screenshots/
 
-resultados.json

@@ -5,18 +5,62 @@ const os = require('os');
 
 puppeteer.use(StealthPlugin());
 
-// --- SELECTORS ---
-const SELECTOR_CPF = 'br-input[formcontrolname="cpf"] input';
-const SELECTOR_BIRTHDATE = 'br-date-picker[formcontrolname="dataNascimento"] input';
-const SELECTOR_LICENSE_EXPIRY = 'br-date-picker[formcontrolname="dataValidade"] input';
-const SELECTOR_BUTTON_PROCEED = 'button.br-button.primary';
+async function* processDriverBatch(drivers) {
+  const CHROME_USER_DATA_DIR = path.resolve(os.homedir(), '.chrome_senatran_profile');
 
-// --- CONSTANTS ---
-const URL = 'https://portalservicos.senatran.serpro.gov.br/#/condutor/consultar-toxicologico';
-const ERROR_SCREENSHOT_PATH = path.resolve(__dirname, 'logs/error_screenshots');
-const CHROME_USER_DATA_DIR = path.resolve(os.homedir(), '.chrome_senatran_profile');
+  const MAX_CONCURRENCY = 5;
+  const semaphore = createSemaphore(MAX_CONCURRENCY);
 
-const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+  const browser = await puppeteer.launch({
+    headless: false,
+    executablePath: '/usr/bin/google-chrome-stable',
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--window-size=1920,1080',
+      '--disable-blink-features=AutomationControlled',
+      '--no-first-run',
+      '--no-default-browser-check',
+      '--disable-infobars',
+    ],
+    defaultViewport: null,
+    userDataDir: CHROME_USER_DATA_DIR,
+  });
+
+  const results = [];
+
+  async function processDriver(idx, driver) {
+    await semaphore.acquire();
+    try {
+      const browserContext = await browser.createBrowserContext();
+      const result = await queryDriverRecord(browserContext, driver);
+
+      const driverResult = result.success
+        ? { ...driver, ...result.data, search_status: 'success' }
+        : { ...driver, search_status: 'error', error: result.error };
+
+      results.push(driverResult);
+    } catch (err) {
+      console.error('Processing error:', err);
+    } finally {
+      semaphore.release();
+    }
+  }
+
+  const tasks = drivers.map((driver, idx) => processDriver(idx, driver));
+
+  while (results.length < drivers.length) {
+    while (results.length > 0) yield results.shift();
+    await delay(50);
+  }
+
+  await Promise.all(tasks);
+  while (results.length > 0) yield results.shift();
+
+  await browser.close();
+  console.log('\n--- All driver queries completed ---');
+}
 
 function formatDate(dateStr) {
   if (!dateStr) return null;
@@ -43,6 +87,8 @@ function createSemaphore(maxConcurrency) {
     },
   };
 }
+
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 // --- PAGE SETUP ---
 async function setupPage(page) {
@@ -147,8 +193,15 @@ async function extractDriverData(page) {
 
 // --- DRIVER QUERY ---
 async function queryDriverRecord(browserContext, driver, maxAttempts = 3) {
+  const URL = 'https://portalservicos.senatran.serpro.gov.br/#/condutor/consultar-toxicologico';
+
   const userAgent =
     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+  const SELECTOR_CPF = 'br-input[formcontrolname="cpf"] input';
+  const SELECTOR_BIRTHDATE = 'br-date-picker[formcontrolname="dataNascimento"] input';
+  const SELECTOR_LICENSE_EXPIRY = 'br-date-picker[formcontrolname="dataValidade"] input';
+  const SELECTOR_BUTTON_PROCEED = 'button.br-button.primary';
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     let page = null;
@@ -230,69 +283,17 @@ async function queryDriverRecord(browserContext, driver, maxAttempts = 3) {
 
 // --- SCREENSHOT ---
 async function captureScreenshot(page, cpf, attempt) {
+  const ERROR_SCREENSHOT_PATH = path.resolve(__dirname, '../../logs/error_screenshots');
+
   if (!page) return;
+
   try {
     const filePath = path.join(ERROR_SCREENSHOT_PATH, `error_${cpf}_attempt${attempt}.png`);
+
     await page.screenshot({ path: filePath, fullPage: true });
   } catch (err) {
     console.error('❌ Failed to capture error screenshot:', err.message);
   }
-}
-
-// --- BATCH PROCESS ---
-async function* processDriverBatch(drivers) {
-  const MAX_CONCURRENCY = 5;
-  const semaphore = createSemaphore(MAX_CONCURRENCY);
-
-  const browser = await puppeteer.launch({
-    headless: false,
-    executablePath: '/usr/bin/google-chrome-stable',
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--window-size=1920,1080',
-      '--disable-blink-features=AutomationControlled',
-      '--no-first-run',
-      '--no-default-browser-check',
-      '--disable-infobars',
-    ],
-    defaultViewport: null,
-    userDataDir: CHROME_USER_DATA_DIR,
-  });
-
-  const results = [];
-
-  async function processDriver(idx, driver) {
-    await semaphore.acquire();
-    try {
-      const browserContext = await browser.createBrowserContext();
-      const result = await queryDriverRecord(browserContext, driver);
-
-      const driverResult = result.success
-        ? { ...driver, ...result.data, search_status: 'success' }
-        : { ...driver, search_status: 'error', error: result.error };
-
-      results.push(driverResult);
-    } catch (err) {
-      console.error('Processing error:', err);
-    } finally {
-      semaphore.release();
-    }
-  }
-
-  const tasks = drivers.map((driver, idx) => processDriver(idx, driver));
-
-  while (results.length < drivers.length) {
-    while (results.length > 0) yield results.shift();
-    await delay(50);
-  }
-
-  await Promise.all(tasks);
-  while (results.length > 0) yield results.shift();
-
-  await browser.close();
-  console.log('\n--- All driver queries completed ---');
 }
 
 module.exports = { processDriverBatch };
