@@ -18,10 +18,24 @@ class ToxicologicalScraper {
   async *processBatch(drivers) {
     await this.initBrowser();
 
-    const tasks = drivers.map((driver) => this.#processDriverWithSemaphore(driver));
+    const tasks = drivers.map((driver) => {
+      const p = this.#processDriverWithSemaphore(driver);
+      p.finally(() => (p.isResolved = true));
+      return p;
+    });
 
-    for (const task of tasks) {
-      const result = await task;
+    const pending = new Set(tasks);
+
+    while (pending.size > 0) {
+      const result = await Promise.race(pending);
+
+      for (const task of pending) {
+        if (task.isResolved) {
+          pending.delete(task);
+          break;
+        }
+      }
+
       yield result;
     }
 
@@ -188,13 +202,17 @@ class ToxicologicalScraper {
           const errorMsg = await this.#getErrorMessage(page);
 
           if (attempt === maxAttempts) {
+            console.log('bateuuuuuuu');
             const capturedImageBase64 = await this.#captureScreenshotBase64(page);
+
+            console.log('bateuuuuuuu', capturedImageBase64);
+
             await page.close();
 
             return {
               success: false,
               error: `Driver not found / error: ${errorMsg}`,
-              capturedImageBase64,
+              captured_image_base64: capturedImageBase64,
             };
           }
 
@@ -213,13 +231,13 @@ class ToxicologicalScraper {
       } catch (err) {
         console.error(`⚠️ Attempt ${attempt} error for CPF ${driver.cpf}: ${err.message}`);
 
-        if (page) await page.close();
-
         if (attempt === maxAttempts) {
           const capturedImageBase64 = await this.#captureScreenshotBase64(page);
 
-          return { success: false, error: err.message, capturedImageBase64 };
+          return { success: false, error: err.message, captured_image_base64: capturedImageBase64 };
         }
+
+        if (page) await page.close();
 
         await this.#delay(500);
       }
