@@ -256,7 +256,7 @@ class ToxicologicalScraper {
       'https://portalservicos.senatran.serpro.gov.br/#/condutor/consultar-toxicologico',
       {
         waitUntil: 'networkidle2',
-        timeout: 60000,
+        timeout: 30000,
       },
     );
     return page;
@@ -270,7 +270,7 @@ class ToxicologicalScraper {
       proceed: 'button.br-button.primary',
     };
 
-    await page.waitForSelector(selectors.cpf, { visible: true, timeout: 60000 });
+    await page.waitForSelector(selectors.cpf, { visible: true, timeout: 30000 });
     await page.click(selectors.cpf, { clickCount: 3 });
     await page.type(selectors.cpf, driver.cpf, { delay: 120 });
 
@@ -285,9 +285,9 @@ class ToxicologicalScraper {
 
   async #waitForResult(page) {
     return Promise.race([
-      page.waitForSelector('h3.text-primary', { visible: true, timeout: 60000 }).then(() => 'ok'),
+      page.waitForSelector('h3.text-primary', { visible: true, timeout: 30000 }).then(() => 'ok'),
       page
-        .waitForSelector('.br-message.is-danger', { visible: true, timeout: 60000 })
+        .waitForSelector('.br-message.is-danger', { visible: true, timeout: 30000 })
         .then(() => 'error'),
     ]);
   }
