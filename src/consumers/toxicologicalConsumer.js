@@ -6,7 +6,6 @@ const {
 } = require('@aws-sdk/client-sqs');
 
 const ToxicologicalScraper = require('../scrapers/ToxicologicalScraper');
-const toxicologicalScraper = new ToxicologicalScraper({ maxConcurrency: 5 });
 
 const client = new SQSClient({
   region: process.env.AWS_REGION,
@@ -40,6 +39,8 @@ async function pollQueue() {
       MaxNumberOfMessages: process.env.BATCH_SIZE,
       WaitTimeSeconds: process.env.WAIT_TIME_SECONDS,
     });
+
+    const toxicologicalScraper = new ToxicologicalScraper({ maxConcurrency: 5 });
 
     const { Messages } = await client.send(command);
 
