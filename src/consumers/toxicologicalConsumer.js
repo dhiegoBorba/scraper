@@ -40,11 +40,11 @@ async function pollQueue() {
       WaitTimeSeconds: process.env.WAIT_TIME_SECONDS,
     });
 
-    const toxicologicalScraper = new ToxicologicalScraper({ maxConcurrency: 5 });
-
     const { Messages } = await client.send(command);
 
     if (Messages && Messages.length > 0) {
+      const toxicologicalScraper = new ToxicologicalScraper({ maxConcurrency: 5 });
+
       const batchData = Messages.map((m) => JSON.parse(m.Body));
 
       console.log(`CONSUMER - ${new Date().toISOString()} Batch of ${Messages.length} messages...`);
