@@ -256,7 +256,7 @@ class ToxicologicalScraper {
       'https://portalservicos.senatran.serpro.gov.br/#/condutor/consultar-toxicologico',
       {
         waitUntil: 'networkidle2',
-        timeout: 30000,
+        timeout: 90000,
       },
     );
     return page;
