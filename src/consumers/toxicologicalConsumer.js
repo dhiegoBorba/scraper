@@ -33,7 +33,7 @@ async function deleteBatch(messages) {
 
 async function pollQueue() {
   try {
-    console.log('CONSUMER - Poll queue ...');
+    console.log(`CONSUMER - ${new Date().toISOString()} Poll queue ...`);
     const command = new ReceiveMessageCommand({
       QueueUrl: process.env.SQS_TOXICOLOGICAL_QUEUE_URL,
       MaxNumberOfMessages: process.env.BATCH_SIZE,
@@ -47,7 +47,7 @@ async function pollQueue() {
     if (Messages && Messages.length > 0) {
       const batchData = Messages.map((m) => JSON.parse(m.Body));
 
-      console.log(`CONSUMER - Batch of ${Messages.length} messages...`);
+      console.log(`CONSUMER - ${new Date().toISOString()} Batch of ${Messages.length} messages...`);
 
       for await (const result of toxicologicalScraper.processBatch(batchData)) {
         console.log(`CONSUMER - Finish ${result.payload.cpf}, result ${result.result.expired_at}`);
