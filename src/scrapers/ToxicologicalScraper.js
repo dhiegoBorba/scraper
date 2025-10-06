@@ -218,7 +218,7 @@ class ToxicologicalScraper {
           console.log(`SCRAPER - Retrying CPF ${driver.cpf} (error: ${errorMsg})`);
 
           await page.close();
-          await this.#delay(500);
+          await this.#delay(2000);
 
           continue;
         }
@@ -238,7 +238,7 @@ class ToxicologicalScraper {
 
         if (page) await page.close();
 
-        await this.#delay(500);
+        await this.#delay(2000);
       }
     }
 
