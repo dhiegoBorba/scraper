@@ -1,0 +1,7 @@
+services:
+  toxicological-consumer:
+    build: .
+    restart: always
+    environment:
+      NODE_ENV: production
+    command: ['./startToxicologicalConsumer.sh']

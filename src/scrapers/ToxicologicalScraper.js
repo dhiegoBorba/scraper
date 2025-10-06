@@ -16,6 +16,8 @@ class ToxicologicalScraper {
   }
 
   async *processBatch(drivers) {
+    console.log('\nSCRAPER - Start toxicological scraper batch processing');
+
     await this.initBrowser();
 
     const tasks = drivers.map((driver) => {
@@ -40,7 +42,7 @@ class ToxicologicalScraper {
     }
 
     await this.#closeBrowser();
-    console.log('\n--- All driver queries completed ---');
+    console.log('SCRAPER - Finish toxicological scraper\n');
   }
 
   async #processDriverWithSemaphore(driver) {
@@ -113,7 +115,7 @@ class ToxicologicalScraper {
 
       return { payload: driver, result: data };
     } catch (err) {
-      console.error('Processing error:', err);
+      console.error('SCRAPER - Processing error:', err);
 
       return { success: false, error: err.message };
     }
@@ -192,7 +194,7 @@ class ToxicologicalScraper {
       try {
         page = await this.#openPage(browserContext);
 
-        console.log(`Attempt ${attempt}/${maxAttempts} for CPF ${driver.cpf}...`);
+        console.log(`SCRAPER - Attempt ${attempt}/${maxAttempts} for CPF ${driver.cpf}...`);
 
         await this.#fillForm(page, driver);
 
@@ -202,10 +204,7 @@ class ToxicologicalScraper {
           const errorMsg = await this.#getErrorMessage(page);
 
           if (attempt === maxAttempts) {
-            console.log('bateuuuuuuu');
             const capturedImageBase64 = await this.#captureScreenshotBase64(page);
-
-            console.log('bateuuuuuuu', capturedImageBase64);
 
             await page.close();
 
@@ -216,7 +215,7 @@ class ToxicologicalScraper {
             };
           }
 
-          console.log(`🔄 Retrying CPF ${driver.cpf} (error: ${errorMsg})`);
+          console.log(`SCRAPER - Retrying CPF ${driver.cpf} (error: ${errorMsg})`);
 
           await page.close();
           await this.#delay(500);
@@ -229,7 +228,7 @@ class ToxicologicalScraper {
 
         return { success: true, ...data };
       } catch (err) {
-        console.error(`⚠️ Attempt ${attempt} error for CPF ${driver.cpf}: ${err.message}`);
+        console.error(`SCRAPER - Attempt ${attempt} error for CPF ${driver.cpf}: ${err.message}`);
 
         if (attempt === maxAttempts) {
           const capturedImageBase64 = await this.#captureScreenshotBase64(page);
@@ -318,7 +317,7 @@ class ToxicologicalScraper {
         captured_image_base64: await this.#captureScreenshotBase64(page),
       };
     } catch (err) {
-      console.error('Error extracting driver data:', err.message);
+      console.error('SCRAPER - Error extracting driver data:', err.message);
       return { expired_at: null, collection_date: null, captured_image_base64: null };
     }
   }
@@ -340,7 +339,7 @@ class ToxicologicalScraper {
     try {
       return await page.screenshot({ fullPage: true, encoding: 'base64' });
     } catch (err) {
-      console.error('Failed to capture base64 screenshot:', err.message);
+      console.error('SCRAPER - Failed to capture base64 screenshot:', err.message);
       return null;
     }
   }

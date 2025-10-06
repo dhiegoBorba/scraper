@@ -32,7 +32,7 @@ RUN npm install
 
 # Copiar código e script de start
 COPY . .
-COPY start.sh .
+COPY startToxicologicalConsumer.sh .
 
 # CMD que garante execução do script
-CMD ["./start.sh"]
+CMD ["./startToxicologicalConsumer.sh"]

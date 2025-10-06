@@ -2,16 +2,15 @@
   "name": "scraper_senatran",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "xvfb-run -a -s \"-screen 0 1920x1080x24\" node test/toxicologicalTest.js",
-    "start": "xvfb-run -a -s \"-screen 0 1920x1080x24\" node index.js"
+    "test": "node test/toxicologicalTest.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@aws-sdk/client-sqs": "^3.901.0",
     "dotenv": "^17.2.3",
     "puppeteer": "^24.22.3",
     "puppeteer-extra": "^3.3.6",
