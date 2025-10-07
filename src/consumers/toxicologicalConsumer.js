@@ -2,6 +2,7 @@ require('dotenv').config();
 const {
   SQSClient,
   ReceiveMessageCommand,
+  SendMessageCommand,
   DeleteMessageBatchCommand,
 } = require('@aws-sdk/client-sqs');
 
@@ -16,26 +17,31 @@ const client = new SQSClient({
 });
 
 async function deleteBatch(messages) {
+  if (!messages || messages.length === 0) return;
+
   const entries = messages.map((m) => ({
     Id: m.MessageId,
     ReceiptHandle: m.ReceiptHandle,
   }));
 
-  if (entries.length === 0) return;
-
-  await client.send(
-    new DeleteMessageBatchCommand({
-      QueueUrl: process.env.SQS_TOXICOLOGICAL_QUEUE_URL,
-      Entries: entries,
-    }),
-  );
+  try {
+    await client.send(
+      new DeleteMessageBatchCommand({
+        QueueUrl: process.env.SQS_TOXICOLOGICAL_REQUEST_QUEUE_URL,
+        Entries: entries,
+      }),
+    );
+  } catch (err) {
+    console.error('Erro ao deletar mensagens do batch:', err);
+  }
 }
 
 async function pollQueue() {
   try {
-    console.log(`CONSUMER - ${new Date().toISOString()} Poll queue ...`);
+    console.log(`\nCONSUMER - ${new Date().toISOString()} | Polling queue...`);
+
     const command = new ReceiveMessageCommand({
-      QueueUrl: process.env.SQS_TOXICOLOGICAL_QUEUE_URL,
+      QueueUrl: process.env.SQS_TOXICOLOGICAL_REQUEST_QUEUE_URL,
       MaxNumberOfMessages: process.env.BATCH_SIZE,
       WaitTimeSeconds: process.env.WAIT_TIME_SECONDS,
     });
@@ -43,14 +49,30 @@ async function pollQueue() {
     const { Messages } = await client.send(command);
 
     if (Messages && Messages.length > 0) {
-      const toxicologicalScraper = new ToxicologicalScraper({ maxConcurrency: 5 });
+      console.log(
+        `CONSUMER - ${new Date().toISOString()} | Batch of ${Messages.length} messages...`,
+      );
 
+      const toxicologicalScraper = new ToxicologicalScraper({ maxConcurrency: 5 });
       const batchData = Messages.map((m) => JSON.parse(m.Body));
 
-      console.log(`CONSUMER - ${new Date().toISOString()} Batch of ${Messages.length} messages...`);
-
       for await (const result of toxicologicalScraper.processBatch(batchData)) {
-        console.log(`CONSUMER - Finish ${result.payload.cpf}, result ${result.result.expired_at}`);
+        console.log(
+          `CONSUMER - ${new Date().toISOString()} | Finished ${result.payload.cpf}, result: ${
+            result.result.expired_at
+          }`,
+        );
+
+        const sendCommand = new SendMessageCommand({
+          QueueUrl: process.env.SQS_TOXICOLOGICAL_RESPONSE_QUEUE_URL,
+          MessageBody: JSON.stringify(result),
+        });
+
+        try {
+          await client.send(sendCommand);
+        } catch (err) {
+          console.error('Erro ao enviar mensagem individual:', err);
+        }
       }
 
       await deleteBatch(Messages);

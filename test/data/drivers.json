@@ -5,6 +5,7 @@
     "cpf": "121.403.136-66",
     "birthday": "05021995",
     "cnh_due_at": "22092035",
+    "status": 4,
     "expired_at": "2024-02-24 00:00:00.000"
   },
   {
@@ -13,6 +14,7 @@
     "cpf": "094.131.506-13",
     "birthday": "06051990",
     "cnh_due_at": "29082035",
+    "status": 4,
     "expired_at": "2024-04-06 00:00:00.000"
   },
   {
@@ -21,6 +23,7 @@
     "cpf": "409.200.988-78",
     "birthday": "15071990",
     "cnh_due_at": "25082035",
+    "status": 4,
     "expired_at": "2025-02-18 00:00:00.000"
   },
   {
@@ -29,6 +32,7 @@
     "cpf": "996.551.522-00",
     "birthday": "10051992",
     "cnh_due_at": "19082035",
+    "status": 4,
     "expired_at": "2025-09-02 00:00:00.000"
   },
   {
@@ -37,6 +41,7 @@
     "cpf": "019.703.105-61",
     "birthday": "28101984",
     "cnh_due_at": "07082035",
+    "status": 4,
     "expired_at": "2025-01-02 00:00:00.000"
   },
   {
@@ -45,6 +50,7 @@
     "cpf": "612.231.822-15",
     "birthday": "18011980",
     "cnh_due_at": "31072035",
+    "status": 4,
     "expired_at": "2024-11-26 00:00:00.000"
   },
   {
@@ -53,6 +59,7 @@
     "cpf": "071.369.926-48",
     "birthday": "10091985",
     "cnh_due_at": "31072035",
+    "status": 4,
     "expired_at": "2024-02-07 00:00:00.000"
   },
   {
@@ -61,6 +68,7 @@
     "cpf": "010.185.670-97",
     "birthday": "27121986",
     "cnh_due_at": "22072035",
+    "status": 4,
     "expired_at": "2025-07-12 00:00:00.000"
   },
   {
@@ -69,6 +77,826 @@
     "cpf": "110.710.129-83",
     "birthday": "15101999",
     "cnh_due_at": "27062035",
+    "status": 4,
     "expired_at": "2025-06-19 00:00:00.000"
+  },
+  {
+    "id": 128983,
+    "name": "ROMEL EDUARDO SARAIVA",
+    "cpf": "039.303.796-78",
+    "birthday": "16021978",
+    "cnh_due_at": "25062035",
+    "status": 4,
+    "expired_at": "2025-08-01 00:00:00.000"
+  },
+  {
+    "id": 43194,
+    "name": "DELMO SOARES DA SILVA",
+    "cpf": "116.845.996-60",
+    "birthday": "03081993",
+    "cnh_due_at": "24062035",
+    "status": 4,
+    "expired_at": "2024-01-30 00:00:00.000"
+  },
+  {
+    "id": 147971,
+    "name": "LUCIANO  ALVES DA SILVA",
+    "cpf": "939.132.306-53",
+    "birthday": "10091975",
+    "cnh_due_at": "17062035",
+    "status": 4,
+    "expired_at": "2025-06-06 00:00:00.000"
+  },
+  {
+    "id": 66952,
+    "name": "MARCOS ALVES SALES",
+    "cpf": "013.019.451-45",
+    "birthday": "20021989",
+    "cnh_due_at": "29042035",
+    "status": 4,
+    "expired_at": "2025-09-26 00:00:00.000"
+  },
+  {
+    "id": 128848,
+    "name": "RENATO LOPES DE ARAUJO",
+    "cpf": "047.571.675-20",
+    "birthday": "29121991",
+    "cnh_due_at": "23042035",
+    "status": 4,
+    "expired_at": "2025-07-06 00:00:00.000"
+  },
+  {
+    "id": 104457,
+    "name": "ALBERTO JOSE DE SOUZA",
+    "cpf": "004.418.085-30",
+    "birthday": "26051981",
+    "cnh_due_at": "15042035",
+    "status": 4,
+    "expired_at": "2024-01-05 21:59:00.000"
+  },
+  {
+    "id": 137891,
+    "name": "WENDELL SILVA SOARES",
+    "cpf": "296.338.848-96",
+    "birthday": "29091979",
+    "cnh_due_at": "20032035",
+    "status": 4,
+    "expired_at": "2024-12-21 00:00:00.000"
+  },
+  {
+    "id": 62544,
+    "name": "RICARDO FABIANO DOS SANTOS",
+    "cpf": "296.216.868-06",
+    "birthday": "15071979",
+    "cnh_due_at": "10032035",
+    "status": 4,
+    "expired_at": "2023-09-03 00:00:00.000"
+  },
+  {
+    "id": 17516,
+    "name": "LUCIANO MANUEL DE SANTANA",
+    "cpf": "016.737.239-42",
+    "birthday": "02091976",
+    "cnh_due_at": "28022035",
+    "status": 4,
+    "expired_at": "2025-05-13 00:00:00.000"
+  },
+  {
+    "id": 13691,
+    "name": "MARCELO JUNIOR SPECIAN",
+    "cpf": "021.815.109-89",
+    "birthday": "22091975",
+    "cnh_due_at": "24022035",
+    "status": 4,
+    "expired_at": "2025-06-06 00:00:00.000"
+  },
+  {
+    "id": 64008,
+    "name": "GERALDO JOSE DOS SANTOS BRAGA",
+    "cpf": "022.163.975-63",
+    "birthday": "29071985",
+    "cnh_due_at": "20022035",
+    "status": 4,
+    "expired_at": "2025-03-12 00:00:00.000"
+  },
+  {
+    "id": 125132,
+    "name": "MAYCOLN ANDERSON BUENO DE CAMARGO JUNIOR",
+    "cpf": "408.439.528-57",
+    "birthday": "29041991",
+    "cnh_due_at": "18022035",
+    "status": 4,
+    "expired_at": "2025-07-20 00:00:00.000"
+  },
+  {
+    "id": 83992,
+    "name": "JOSE RAIMUNDO BATISTA FROTA",
+    "cpf": "594.385.682-04",
+    "birthday": "22021975",
+    "cnh_due_at": "10022035",
+    "status": 4,
+    "expired_at": "2025-05-28 00:00:00.000"
+  },
+  {
+    "id": 248963,
+    "name": "EDSON LOPES DO VALE",
+    "cpf": "412.293.408-74",
+    "birthday": "05021991",
+    "cnh_due_at": "05022035",
+    "status": 4,
+    "expired_at": "2024-03-21 00:00:00.000"
+  },
+  {
+    "id": 186832,
+    "name": "MARCELO PEDRO DE LIMA",
+    "cpf": "327.630.218-75",
+    "birthday": "13021983",
+    "cnh_due_at": "05022035",
+    "status": 4,
+    "expired_at": "2024-07-21 00:00:00.000"
+  },
+  {
+    "id": 6646,
+    "name": "ELISSON SILVA RIBEIRO",
+    "cpf": "087.979.899-83",
+    "birthday": "02031995",
+    "cnh_due_at": "03022035",
+    "status": 4,
+    "expired_at": "2025-07-27 00:00:00.000"
+  },
+  {
+    "id": 142377,
+    "name": "JULIO CESAR SANTOS SILVA",
+    "cpf": "100.612.414-40",
+    "birthday": "21071991",
+    "cnh_due_at": "17012035",
+    "status": 4,
+    "expired_at": "2024-11-23 00:00:00.000"
+  },
+  {
+    "id": 57672,
+    "name": "MARCOS ANDRADE DE LIMA",
+    "cpf": "378.836.708-32",
+    "birthday": "02021994",
+    "cnh_due_at": "07012035",
+    "status": 4,
+    "expired_at": "2025-05-22 00:00:00.000"
+  },
+  {
+    "id": 142386,
+    "name": "WESTEN TEIXEIRA SOUSA",
+    "cpf": "003.997.972-54",
+    "birthday": "10091989",
+    "cnh_due_at": "07012035",
+    "status": 4,
+    "expired_at": "2025-04-26 00:00:00.000"
+  },
+  {
+    "id": 59423,
+    "name": "FABRICIO RAMBO THOME",
+    "cpf": "967.939.020-91",
+    "birthday": "07061981",
+    "cnh_due_at": "07012035",
+    "status": 4,
+    "expired_at": "2025-05-30 00:00:00.000"
+  },
+  {
+    "id": 55393,
+    "name": "SIVALDO ALVES DA SILVA",
+    "cpf": "304.417.948-31",
+    "birthday": "15031983",
+    "cnh_due_at": "07012035",
+    "status": 4,
+    "expired_at": "2025-01-04 00:00:00.000"
+  },
+  {
+    "id": 100779,
+    "name": "IZAC DOS SANTOS ALBANO",
+    "cpf": "422.187.538-04",
+    "birthday": "12041993",
+    "cnh_due_at": "06012035",
+    "status": 4,
+    "expired_at": "2023-08-24 00:00:00.000"
+  },
+  {
+    "id": 54505,
+    "name": "FABRíCIO BORGES DOS SANTOS",
+    "cpf": "859.984.415-67",
+    "birthday": "26051994",
+    "cnh_due_at": "18122034",
+    "status": 4,
+    "expired_at": "2026-07-15 00:00:00.000"
+  },
+  {
+    "id": 59240,
+    "name": "JEFFERSON DOS REIS NASCIMENTO",
+    "cpf": "330.796.608-11",
+    "birthday": "23041984",
+    "cnh_due_at": "17122034",
+    "status": 4,
+    "expired_at": "2025-06-12 00:00:00.000"
+  },
+  {
+    "id": 207602,
+    "name": "DERKIAN DE ALMEIDA TAVARES",
+    "cpf": "121.456.637-54",
+    "birthday": "10011987",
+    "cnh_due_at": "16122034",
+    "status": 4,
+    "expired_at": "2024-08-01 00:00:00.000"
+  },
+  {
+    "id": 9562,
+    "name": "JEFERSON GONCALVES RIBEIRO",
+    "cpf": "041.215.149-98",
+    "birthday": "05031984",
+    "cnh_due_at": "11122034",
+    "status": 4,
+    "expired_at": "2025-06-05 00:00:00.000"
+  },
+  {
+    "id": 87676,
+    "name": "MILTON SANTOS ALMEIDA",
+    "cpf": "811.033.105-00",
+    "birthday": "09051981",
+    "cnh_due_at": "09122034",
+    "status": 4,
+    "expired_at": "2025-10-02 00:00:00.000"
+  },
+  {
+    "id": 90397,
+    "name": "ALESSANDRO OLIVEIRA DO NASCIMENTO",
+    "cpf": "080.336.057-66",
+    "birthday": "11101976",
+    "cnh_due_at": "02122034",
+    "status": 4,
+    "expired_at": "2024-06-22 00:00:00.000"
+  },
+  {
+    "id": 44834,
+    "name": "CARLOS ALBERTO DAS NEVES LIMA",
+    "cpf": "117.076.287-50",
+    "birthday": "24101985",
+    "cnh_due_at": "21112034",
+    "status": 4,
+    "expired_at": "2025-04-23 00:00:00.000"
+  },
+  {
+    "id": 83972,
+    "name": "TIAGO PINTO DA SILVA",
+    "cpf": "097.242.836-40",
+    "birthday": "22051989",
+    "cnh_due_at": "21112034",
+    "status": 4,
+    "expired_at": "2025-03-07 00:00:00.000"
+  },
+  {
+    "id": 45051,
+    "name": "JEAN CARLOS DE PADUA",
+    "cpf": "076.247.746-66",
+    "birthday": "16041984",
+    "cnh_due_at": "14112034",
+    "status": 4,
+    "expired_at": "2024-09-06 00:00:00.000"
+  },
+  {
+    "id": 19882,
+    "name": "BILIANGEL BOLIVAR CARABALLO",
+    "cpf": "708.342.462-44",
+    "birthday": "29091986",
+    "cnh_due_at": "12112034",
+    "status": 4,
+    "expired_at": "2025-06-03 00:00:00.000"
+  },
+  {
+    "id": 179390,
+    "name": "JULIANO OLIVEIRA DA COSTA",
+    "cpf": "022.465.980-44",
+    "birthday": "14071989",
+    "cnh_due_at": "06112034",
+    "status": 4,
+    "expired_at": "2024-06-19 00:00:00.000"
+  },
+  {
+    "id": 15533,
+    "name": "PAULO ALCANTARA DA SILVA",
+    "cpf": "022.980.495-05",
+    "birthday": "23041985",
+    "cnh_due_at": "06112034",
+    "status": 4,
+    "expired_at": "2024-10-11 00:00:00.000"
+  },
+  {
+    "id": 27331,
+    "name": "SIDNEI HERMES",
+    "cpf": "011.458.130-46",
+    "birthday": "07091986",
+    "cnh_due_at": "05112034",
+    "status": 4,
+    "expired_at": "2025-06-08 00:00:00.000"
+  },
+  {
+    "id": 66498,
+    "name": "PAULO SERGIO DE SOUZA NASCIMENTO",
+    "cpf": "276.460.218-90",
+    "birthday": "19061978",
+    "cnh_due_at": "04112034",
+    "status": 4,
+    "expired_at": "2024-09-11 00:00:00.000"
+  },
+  {
+    "id": 133684,
+    "name": "EBER DE OLIVEIRA SOUZA",
+    "cpf": "312.695.588-62",
+    "birthday": "23101982",
+    "cnh_due_at": "29102034",
+    "status": 4,
+    "expired_at": "2023-05-20 00:00:00.000"
+  },
+  {
+    "id": 19293,
+    "name": "FABIO SANTOS NOVAES",
+    "cpf": "288.345.918-52",
+    "birthday": "23061977",
+    "cnh_due_at": "28102034",
+    "status": 4,
+    "expired_at": "2024-12-12 00:00:00.000"
+  },
+  {
+    "id": 71577,
+    "name": "GIULIANO DA COSTA",
+    "cpf": "039.670.519-78",
+    "birthday": "01091982",
+    "cnh_due_at": "28102034",
+    "status": 4,
+    "expired_at": "2024-12-31 00:00:00.000"
+  },
+  {
+    "id": 23800,
+    "name": "ROBERTO SANTOS OLIVEIRA",
+    "cpf": "035.114.525-70",
+    "birthday": "06041989",
+    "cnh_due_at": "09102034",
+    "status": 4,
+    "expired_at": "2025-06-04 00:00:00.000"
+  },
+  {
+    "id": 10079,
+    "name": "EVERTON DARCI GANZART PEREIRA DA SILVA",
+    "cpf": "072.149.239-80",
+    "birthday": "08111991",
+    "cnh_due_at": "04102034",
+    "status": 4,
+    "expired_at": "2025-06-25 00:00:00.000"
+  },
+  {
+    "id": 152776,
+    "name": "EDIMARCIO MARQUES NAZARÉ",
+    "cpf": "010.822.365-51",
+    "birthday": "02031981",
+    "cnh_due_at": "03102034",
+    "status": 4,
+    "expired_at": "2024-02-28 00:00:00.000"
+  },
+  {
+    "id": 145370,
+    "name": "CLAUDINEI DE OLIVEIRA PAIXÃO",
+    "cpf": "320.946.248-89",
+    "birthday": "25111983",
+    "cnh_due_at": "01102034",
+    "status": 4,
+    "expired_at": "2025-01-28 00:00:00.000"
+  },
+  {
+    "id": 93284,
+    "name": "JEFERSON ARAUJO DO CARMO",
+    "cpf": "052.395.815-33",
+    "birthday": "09041992",
+    "cnh_due_at": "26092034",
+    "status": 4,
+    "expired_at": "2025-07-02 00:00:00.000"
+  },
+  {
+    "id": 139143,
+    "name": "PAULO SÉRGIO DA SILVA FERREIRA",
+    "cpf": "061.718.406-29",
+    "birthday": "21121982",
+    "cnh_due_at": "26092034",
+    "status": 4,
+    "expired_at": "2025-07-05 00:00:00.000"
+  },
+  {
+    "id": 16865,
+    "name": "JADILSON DA SILVA RODRIGUES",
+    "cpf": "040.673.664-26",
+    "birthday": "17031983",
+    "cnh_due_at": "25092034",
+    "status": 4,
+    "expired_at": "2024-05-05 00:00:00.000"
+  },
+  {
+    "id": 138969,
+    "name": "FABIO MACIEL DA SILVA",
+    "cpf": "876.790.782-20",
+    "birthday": "09021985",
+    "cnh_due_at": "15092034",
+    "status": 4,
+    "expired_at": "2024-08-04 00:00:00.000"
+  },
+  {
+    "id": 108860,
+    "name": "ALEX MARTINS DOS SANTOS",
+    "cpf": "170.782.488-64",
+    "birthday": "16041976",
+    "cnh_due_at": "09092034",
+    "status": 4,
+    "expired_at": "2025-01-24 00:00:00.000"
+  },
+  {
+    "id": 24199,
+    "name": "CARLOS ANTONIO DE SOUZA",
+    "cpf": "044.786.979-57",
+    "birthday": "25041983",
+    "cnh_due_at": "05092034",
+    "status": 4,
+    "expired_at": "2025-08-14 00:00:00.000"
+  },
+  {
+    "id": 241060,
+    "name": "ALMIR AMADOR PIRES",
+    "cpf": "800.663.132-87",
+    "birthday": "09011983",
+    "cnh_due_at": "05092034",
+    "status": 4,
+    "expired_at": "2023-11-11 00:00:00.000"
+  },
+  {
+    "id": 40975,
+    "name": "FERNANDO SILVA MARQUES",
+    "cpf": "063.146.466-26",
+    "birthday": "13011982",
+    "cnh_due_at": "04092034",
+    "status": 4,
+    "expired_at": "2025-06-27 00:00:00.000"
+  },
+  {
+    "id": 144930,
+    "name": "CLAYTON DIAS DOS SANTOS",
+    "cpf": "311.692.008-77",
+    "birthday": "14091983",
+    "cnh_due_at": "26082034",
+    "status": 4,
+    "expired_at": "2024-09-11 00:00:00.000"
+  },
+  {
+    "id": 208676,
+    "name": "ALBERTO FONSECA SALES",
+    "cpf": "128.206.297-25",
+    "birthday": "29021988",
+    "cnh_due_at": "26082034",
+    "status": 4,
+    "expired_at": "2025-05-09 00:00:00.000"
+  },
+  {
+    "id": 199439,
+    "name": "CIDE BRITO DOS SANTOS",
+    "cpf": "015.471.985-40",
+    "birthday": "04041986",
+    "cnh_due_at": "26082034",
+    "status": 4,
+    "expired_at": "2024-07-15 00:00:00.000"
+  },
+  {
+    "id": 192165,
+    "name": "FABIO SOARES MESQUITA",
+    "cpf": "816.166.003-49",
+    "birthday": "17061977",
+    "cnh_due_at": "25082034",
+    "status": 4,
+    "expired_at": "2024-12-26 00:00:00.000"
+  },
+  {
+    "id": 98625,
+    "name": "SIDNEY SOUZA CARVALHO",
+    "cpf": "094.197.767-60",
+    "birthday": "04031982",
+    "cnh_due_at": "25082034",
+    "status": 4,
+    "expired_at": "2025-08-19 00:00:00.000"
+  },
+  {
+    "id": 99162,
+    "name": "CLEBER OERTA DA SILVA",
+    "cpf": "020.010.281-80",
+    "birthday": "29041986",
+    "cnh_due_at": "24082034",
+    "status": 4,
+    "expired_at": "2025-02-02 00:00:00.000"
+  },
+  {
+    "id": 57415,
+    "name": "RICHARDSON ALVES COSTA",
+    "cpf": "089.268.337-63",
+    "birthday": "04061981",
+    "cnh_due_at": "19082034",
+    "status": 4,
+    "expired_at": "2025-08-09 00:00:00.000"
+  },
+  {
+    "id": 45306,
+    "name": "JEFERSON RAMOS",
+    "cpf": "812.059.700-10",
+    "birthday": "10031982",
+    "cnh_due_at": "16082034",
+    "status": 4,
+    "expired_at": "2025-08-08 00:00:00.000"
+  },
+  {
+    "id": 103665,
+    "name": "RAFAEL APARECIDO LOPES",
+    "cpf": "392.131.018-05",
+    "birthday": "01031988",
+    "cnh_due_at": "15082034",
+    "status": 4,
+    "expired_at": "2025-06-20 00:00:00.000"
+  },
+  {
+    "id": 193187,
+    "name": "GIOVANE LOPES MARCOLINO",
+    "cpf": "094.572.286-93",
+    "birthday": "28061989",
+    "cnh_due_at": "13082034",
+    "status": 4,
+    "expired_at": "2025-06-13 00:00:00.000"
+  },
+  {
+    "id": 26737,
+    "name": "ANDREIA CRISTINA LIEBETANZ ALVES",
+    "cpf": "265.513.398-67",
+    "birthday": "10081978",
+    "cnh_due_at": "12082034",
+    "status": 4,
+    "expired_at": "2025-02-28 00:00:00.000"
+  },
+  {
+    "id": 247583,
+    "name": "EDSON IZIDRO FERREIRA",
+    "cpf": "051.622.454-96",
+    "birthday": "26121980",
+    "cnh_due_at": "11082034",
+    "status": 4,
+    "expired_at": "2025-08-02 00:00:00.000"
+  },
+  {
+    "id": 22815,
+    "name": "JEFERSON LUIS DA SILVA",
+    "cpf": "285.932.418-67",
+    "birthday": "09011980",
+    "cnh_due_at": "01082034",
+    "status": 4,
+    "expired_at": "2025-07-24 00:00:00.000"
+  },
+  {
+    "id": 25060,
+    "name": "THIAGO SANTANA",
+    "cpf": "110.869.769-08",
+    "birthday": "11041998",
+    "cnh_due_at": "29072034",
+    "status": 4,
+    "expired_at": "2024-09-19 00:00:00.000"
+  },
+  {
+    "id": 223857,
+    "name": "FABRICIO CHAGAS DA SILVA",
+    "cpf": "732.990.651-49",
+    "birthday": "05051988",
+    "cnh_due_at": "28072034",
+    "status": 4,
+    "expired_at": "2025-07-24 00:00:00.000"
+  },
+  {
+    "id": 127069,
+    "name": "DIEGO HENRIQUE ONESKO",
+    "cpf": "338.203.318-67",
+    "birthday": "22011987",
+    "cnh_due_at": "22072034",
+    "status": 4,
+    "expired_at": "2025-02-18 00:00:00.000"
+  },
+  {
+    "id": 86945,
+    "name": "FLAVIO QUARESMA DE REZENDE",
+    "cpf": "014.475.601-32",
+    "birthday": "19081986",
+    "cnh_due_at": "18072034",
+    "status": 4,
+    "expired_at": "2025-07-11 00:00:00.000"
+  },
+  {
+    "id": 191262,
+    "name": "SEBASTIAO DA SILVA FRANCISCO",
+    "cpf": "192.088.278-28",
+    "birthday": "17081977",
+    "cnh_due_at": "18072034",
+    "status": 4,
+    "expired_at": "2025-07-03 00:00:00.000"
+  },
+  {
+    "id": 193275,
+    "name": "AGNALDO BISPO DOS SANTOS",
+    "cpf": "316.887.608-90",
+    "birthday": "09011984",
+    "cnh_due_at": "17072034",
+    "status": 4,
+    "expired_at": "2024-04-20 00:00:00.000"
+  },
+  {
+    "id": 139341,
+    "name": "VICTOR SILVA BRAGA",
+    "cpf": "131.501.527-71",
+    "birthday": "31011997",
+    "cnh_due_at": "17072034",
+    "status": 4,
+    "expired_at": "2024-08-08 00:00:00.000"
+  },
+  {
+    "id": 30508,
+    "name": "MAXWELL DOS SANTOS SILVA",
+    "cpf": "386.579.468-82",
+    "birthday": "22031991",
+    "cnh_due_at": "05072034",
+    "status": 4,
+    "expired_at": "2025-06-22 00:00:00.000"
+  },
+  {
+    "id": 36251,
+    "name": "WESLEY KAIQUE BARBOSA DE AZEVEDO OLIVEIRA",
+    "cpf": "454.403.978-92",
+    "birthday": "23021997",
+    "cnh_due_at": "01072034",
+    "status": 4,
+    "expired_at": "2025-06-16 00:00:00.000"
+  },
+  {
+    "id": 283375,
+    "name": "JONATHAN HENRIQUE DA SILVA",
+    "cpf": "068.770.719-64",
+    "birthday": "13061990",
+    "cnh_due_at": "01072034",
+    "status": 4,
+    "expired_at": "2024-02-23 00:00:00.000"
+  },
+  {
+    "id": 217189,
+    "name": "PAULO ROGERIO DIAS",
+    "cpf": "022.658.729-03",
+    "birthday": "16081977",
+    "cnh_due_at": "28062034",
+    "status": 4,
+    "expired_at": "2025-06-19 00:00:00.000"
+  },
+  {
+    "id": 114038,
+    "name": "ALEXANDRE NUNES VAZ",
+    "cpf": "044.322.971-66",
+    "birthday": "06071993",
+    "cnh_due_at": "27062034",
+    "status": 4,
+    "expired_at": "2025-06-06 00:00:00.000"
+  },
+  {
+    "id": 97057,
+    "name": "JONAS DA COSTA CUTRIM",
+    "cpf": "008.193.093-38",
+    "birthday": "02071985",
+    "cnh_due_at": "26062034",
+    "status": 4,
+    "expired_at": "2024-12-23 00:00:00.000"
+  },
+  {
+    "id": 89442,
+    "name": "CRISTIANO PORTUGAL ESPERANCA",
+    "cpf": "056.801.927-05",
+    "birthday": "18061981",
+    "cnh_due_at": "26062034",
+    "status": 4,
+    "expired_at": "2025-06-11 00:00:00.000"
+  },
+  {
+    "id": 95822,
+    "name": "ALDEMIR DOS SANTOS ALBUQUERQUE",
+    "cpf": "086.256.454-96",
+    "birthday": "26081988",
+    "cnh_due_at": "26062034",
+    "status": 4,
+    "expired_at": "2024-07-21 00:05:00.000"
+  },
+  {
+    "id": 284353,
+    "name": "FELIPE FEITOSA MOTA DE OLIVEIRA",
+    "cpf": "423.063.048-40",
+    "birthday": "23051994",
+    "cnh_due_at": "24062034",
+    "status": 4,
+    "expired_at": "2025-05-29 00:00:00.000"
+  },
+  {
+    "id": 43210,
+    "name": "PAULO CESAR DA SILVA",
+    "cpf": "009.790.534-80",
+    "birthday": "05061981",
+    "cnh_due_at": "24062034",
+    "status": 4,
+    "expired_at": "2024-12-28 00:00:00.000"
+  },
+  {
+    "id": 134524,
+    "name": "ROBERTO MARTINS DE JESUS",
+    "cpf": "028.397.576-80",
+    "birthday": "28031976",
+    "cnh_due_at": "19062034",
+    "status": 4,
+    "expired_at": "2024-10-24 00:00:00.000"
+  },
+  {
+    "id": 31665,
+    "name": "BRUNO HENRIQUE LIMA DE BARROS",
+    "cpf": "069.231.384-26",
+    "birthday": "31071989",
+    "cnh_due_at": "16062034",
+    "status": 4,
+    "expired_at": "2023-12-17 00:00:00.000"
+  },
+  {
+    "id": 341445,
+    "name": "EDVALDO RIBEIRO LIMA",
+    "cpf": "185.143.968-46",
+    "birthday": "14101977",
+    "cnh_due_at": "13062034",
+    "status": 4,
+    "expired_at": "2025-06-06 00:00:00.000"
+  },
+  {
+    "id": 266961,
+    "name": "MARCELO DE OLIVEIRA",
+    "cpf": "321.713.328-59",
+    "birthday": "05101983",
+    "cnh_due_at": "13062034",
+    "status": 4,
+    "expired_at": "2025-06-05 00:00:00.000"
+  },
+  {
+    "id": 10863,
+    "name": "DANIEL ROBSON LEITE",
+    "cpf": "036.059.369-03",
+    "birthday": "11091982",
+    "cnh_due_at": "13062034",
+    "status": 4,
+    "expired_at": "2025-07-01 00:00:00.000"
+  },
+  {
+    "id": 81335,
+    "name": "BRUNO CRISTIANO VICENTE DA SILVA",
+    "cpf": "388.817.878-90",
+    "birthday": "07081991",
+    "cnh_due_at": "12062034",
+    "status": 4,
+    "expired_at": "2024-10-12 00:00:00.000"
+  },
+  {
+    "id": 98471,
+    "name": "CARLOS ALBERTO DOS SANTOS SILVA",
+    "cpf": "019.363.665-41",
+    "birthday": "18041986",
+    "cnh_due_at": "10062034",
+    "status": 4,
+    "expired_at": "2025-04-19 00:00:00.000"
+  },
+  {
+    "id": 8079,
+    "name": "DIOGO RODRIGO COSTA FERREIRA",
+    "cpf": "121.846.784-30",
+    "birthday": "24051996",
+    "cnh_due_at": "07062034",
+    "status": 4,
+    "expired_at": "2024-01-01 00:00:00.000"
+  },
+  {
+    "id": 61429,
+    "name": "WESLEY EDUARDO RODRIGUES",
+    "cpf": "051.876.946-18",
+    "birthday": "13071981",
+    "cnh_due_at": "06062034",
+    "status": 4,
+    "expired_at": "2025-08-27 00:00:00.000"
+  },
+  {
+    "id": 11345,
+    "name": "GUILLHERME ALBERTO AGUILAR DANTAS",
+    "cpf": "047.372.443-09",
+    "birthday": "29061992",
+    "cnh_due_at": "06062034",
+    "status": 4,
+    "expired_at": "2025-06-02 00:00:00.000"
   }
 ]
