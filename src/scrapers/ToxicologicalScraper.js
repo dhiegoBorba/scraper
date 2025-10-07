@@ -263,8 +263,8 @@ class ToxicologicalScraper {
   }
 
   async #fillForm(page, driver) {
-    const birthdayFormatted = formatDateToDDMMYYYY(driver.birthday);
-    const cnhDueAtFormatted = formatDateToDDMMYYYY(driver.cnh_due_at);
+    const birthdayFormatted = this.#formatDateToDDMMYYYY(driver.birthday);
+    const cnhDueAtFormatted = this.#formatDateToDDMMYYYY(driver.cnh_due_at);
 
     const selectors = {
       cpf: 'br-input[formcontrolname="cpf"] input',
