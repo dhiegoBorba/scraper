@@ -53,7 +53,9 @@ async function pollQueue() {
         `CONSUMER - ${new Date().toISOString()} | Batch of ${Messages.length} messages...`,
       );
 
-      const toxicologicalScraper = new ToxicologicalScraper({ maxConcurrency: 5 });
+      const toxicologicalScraper = new ToxicologicalScraper({
+        maxConcurrency: process.env.MAX_CONCURRENCY,
+      });
       const batchData = Messages.map((m) => JSON.parse(m.Body));
 
       for await (const result of toxicologicalScraper.processBatch(batchData)) {
