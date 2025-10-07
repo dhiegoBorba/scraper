@@ -263,6 +263,9 @@ class ToxicologicalScraper {
   }
 
   async #fillForm(page, driver) {
+    const birthdayFormatted = formatDateToDDMMYYYY(driver.birthday);
+    const cnhDueAtFormatted = formatDateToDDMMYYYY(driver.cnh_due_at);
+
     const selectors = {
       cpf: 'br-input[formcontrolname="cpf"] input',
       birthdate: 'br-date-picker[formcontrolname="dataNascimento"] input',
@@ -275,10 +278,10 @@ class ToxicologicalScraper {
     await page.type(selectors.cpf, driver.cpf, { delay: 120 });
 
     await page.click(selectors.birthdate, { clickCount: 3 });
-    await page.type(selectors.birthdate, driver.birthday, { delay: 120 });
+    await page.type(selectors.birthdate, birthdayFormatted, { delay: 120 });
 
     await page.click(selectors.licenseExpiry, { clickCount: 3 });
-    await page.type(selectors.licenseExpiry, driver.cnh_due_at, { delay: 120 });
+    await page.type(selectors.licenseExpiry, cnhDueAtFormatted, { delay: 120 });
 
     await page.click(selectors.proceed);
   }
@@ -333,6 +336,11 @@ class ToxicologicalScraper {
     const [day, month, year] = dateStr.split('/').map(Number);
     return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} 00:00:00.000`;
   }
+
+  #formatDateToDDMMYYYY = (dateStr) => {
+    const [year, month, day] = dateStr.split('-');
+    return `${day}${month}${year}`;
+  };
 
   async #captureScreenshotBase64(page) {
     if (!page) return null;
